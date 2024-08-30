@@ -10,9 +10,19 @@ namespace Sales_NET8.Web
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=LocalConnection"));
+
+            //Add Runtime Compilation
+            builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+
+            //Inject datacontext
+            builder.Services.AddDbContext<DataContext>(o =>
+            {
+                o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             var app = builder.Build();
 
