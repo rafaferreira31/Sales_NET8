@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Sales_NET8.Web.Data;
+using System.Drawing.Text;
 
 namespace Sales_NET8.Web
 {
@@ -13,18 +14,22 @@ namespace Sales_NET8.Web
 
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=LocalConnection"));
 
             //Add Runtime Compilation
             builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
             //Inject datacontext
-            builder.Services.AddDbContext<DataContext>(o =>
+            builder.Services.AddDbContext<DataContext>(cfg =>
             {
-                o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+                cfg.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection"));
             });
 
+            builder.Services.AddTransient<SeedDb>();
+
+            builder.Services.AddControllersWithViews();
+
             var app = builder.Build();
+            RunSeeding(app);
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -46,6 +51,18 @@ namespace Sales_NET8.Web
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
+        }
+
+
+        private static void RunSeeding(WebApplication app)
+        {
+            var scopeFactory = app.Services.GetService<IServiceScopeFactory>();
+
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var seeder = scope.ServiceProvider.GetService<SeedDb>();
+                seeder.SeedAsync().Wait(); 
+            }
         }
     }
 }

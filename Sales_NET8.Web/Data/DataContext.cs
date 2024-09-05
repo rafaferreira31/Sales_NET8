@@ -11,6 +11,7 @@ namespace Sales_NET8.Web.Data
         }
 
         public DbSet<Country> Countries { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
